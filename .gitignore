@@ -5,3 +5,4 @@
 *.bat
 *.vscode/
 *.vspreview/
+*__pycache__/
