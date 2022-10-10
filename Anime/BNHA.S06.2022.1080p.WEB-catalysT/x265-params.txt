@@ -1,8 +1,8 @@
 -o {clip_output:s} - --y4m
 --preset slow --high-tier --ref 5
 --frames {frames:d} --fps {fps_num:d}/{fps_den:d} --output-depth {bits:d}
---crf 20.6 --aq-mode 3 --aq-strength 0.85 --cbqpoffs -2 --crqpoffs -2 --qcomp 0.66
+--crf 21 --aq-mode 3 --aq-strength 0.95 --cbqpoffs -2 --crqpoffs -2 --qcomp 0.66
 --psy-rd 1 --psy-rdoq 1.5 --keyint 240 --min-keyint 24 --bframes 8 --rc-lookahead 240
---b-intra --weightb --tu-inter-depth 2 --tu-intra-depth 2
+--b-intra --weightb --tu-inter-depth 3 --tu-intra-depth 3
 --sar 1 --range limited --colorprim 1 --transfer 1 --colormatrix 1 
 --min-luma 0 --max-luma 1023
