@@ -1,6 +1,8 @@
 -o {clip_output:s} - --y4m
---preset slow
+--preset slow --high-tier --ref 5
 --frames {frames:d} --fps {fps_num:d}/{fps_den:d} --output-depth {bits:d}
---psy-rd TODO --psy-rdoq TODO --keyint 240 --min-keyint 24 --bframes 8 --deblock=TODO
---crf TODO --aq-mode 3 --aq-strength TODO --cbqpoffs -2 --crqpoffs -2 --qcomp TODO
---sar 1 --range limited --colorprim 1 --transfer 1 --colormatrix 1 --min-luma {min_luma:d} --max-luma {max_luma:d}
+--crf 20.5 --aq-mode 3 --aq-strength 0.85 --cbqpoffs -2 --crqpoffs -2 --qcomp 0.63
+--psy-rd 1.3 --psy-rdoq 1.5 --keyint 240 --min-keyint 24 --bframes 8 --rc-lookahead 240
+--b-intra --weightb --tu-inter-depth 3 --tu-intra-depth 3
+--sar 1 --range limited --colorprim 1 --transfer 1 --colormatrix 1 
+--max-luma 1023
