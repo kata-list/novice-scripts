@@ -2,6 +2,11 @@ import vapoursynth as vs
 import vstools as t
 import vskernels as k
 from rvsfunc.NNEDI3 import NNEDI3
+from vsdehalo import fine_dehalo
+from dfttest2 import DFTTest, Backend
+from debandshit import dumb3kdb
+from xvs import WarpFixChromaBlend
+from vsmask.edge import FDoG
 
 core = vs.core
 
@@ -33,5 +38,20 @@ resc_y = exclude_op_ed
 
 join_yuv = core.std.ShufflePlanes([resc_y, clip32], [0, 1, 2], vs.YUV)
 
-clip.set_output(0)
-join_yuv.set_output(1)
+resc16 = t.depth(join_yuv, 16)
+
+dehalo = fine_dehalo(resc16, rx=2.4, brightstr=1, darkstr=0.1)
+
+uv_warp = WarpFixChromaBlend(dehalo)
+
+denoise = DFTTest(uv_warp, 1, 1, backend=Backend.CPU())
+
+deband = dumb3kdb(denoise, 16, [29, 17, 17], [15, 0])
+
+mask = FDoG().edgemask(t.depth(clip_y, 16), 15<<8, 15<<8).std.Maximum().std.Minimum()
+
+a_m = deband.std.MaskedMerge(uv_warp, mask)
+
+final = t.finalize_clip(a_m, 10)
+
+final.set_output()
