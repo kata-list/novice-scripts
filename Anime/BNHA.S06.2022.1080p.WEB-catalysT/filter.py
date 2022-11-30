@@ -4,10 +4,9 @@ import vskernels as k
 
 from awsmfunc.base import bbmod
 from rvsfunc.NNEDI3 import NNEDI3
-from vsdehalo.alpha import fine_dehalo
 from dfttest2 import DFTTest, Backend
 from vsmask.edge import FDoG
-from debandshit.debanders import dumb3kdb
+from vsdeband import F3kdb
 
 core = vs.core
 
@@ -24,7 +23,7 @@ def filter_chain(clip: vs.VideoNode) -> vs.VideoNode:
     # Source is native 720p . Studio upscaled it using bilinear kernel .
     # Descaled the Y(luma) Plane in 32bit float .
     
-    upscale_y = NNEDI3().rpow2(descale_y)
+    upscale_y = NNEDI3.rpow2(descale_y)
     # 720p descaled clip -> 2x upscale with NNEDI3 (1440p) . 
 
     to_1080p = k.BicubicAuto(c=-1/4).scale(upscale_y, 1920, 1080)
@@ -46,19 +45,17 @@ def filter_chain(clip: vs.VideoNode) -> vs.VideoNode:
     # Merging back the rescaled Y plane with UV(chroma) planes .
 
     resc16 = t.depth(join_yuv, 16)
-    # Preparing the clip for dehaloing, denoising and debanding .
-    
-    dehalo = fine_dehalo(resc16, rx=2.3, darkstr=0, brightstr=0.9)
+    # Preparing the clip for denoising and debanding .
 
-    denoise = DFTTest(dehalo, ftype=1, sigma=1, backend=Backend.CPU())
+    denoise = DFTTest(resc16, ftype=1, sigma=1, backend=Backend.CPU())
 
-    deband = dumb3kdb(denoise, 16, 28, 15)
+    deband = F3kdb.deband(denoise, 16, 28, 15)
 
     detail_mask = FDoG().edgemask(t.get_y(resc16), 15<<8, 15<<8)\
                   .std.Maximum().std.Maximum().std.Minimum()
     # Preparing a strong detail mask to protect the edges .
 
-    apply_mask = core.std.MaskedMerge(deband, dehalo, detail_mask)
+    apply_mask = core.std.MaskedMerge(deband, resc16, detail_mask)
 
     final = t.finalize_clip(apply_mask, 10)
     # Finalizing the filtered output to 10bit .
